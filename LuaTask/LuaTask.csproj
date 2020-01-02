@@ -5,11 +5,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Authors>chenxuuu</Authors>
     <RepositoryUrl>https://github.com/chenxuuu/LuaTask-csharp</RepositoryUrl>
-    <PackageVersion>1.0.0</PackageVersion>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='net45'">
-    <PlatformTarget>x86</PlatformTarget>
+    <PackageVersion>1.0.1</PackageVersion>
   </PropertyGroup>
 
   <ItemGroup>
