@@ -17,6 +17,12 @@ namespace net45Test
             };
 
             l.DoString(@"
+sys.async('net45Test','net45Test.Test.test',{123,'text Test'},
+function(r,data)
+print('cb function',r,data,os.time())
+end)
+print(os.time())
+
 sys.timerStart(print,2000,'2 seconds')
 sys.timerLoopStart(print,1000,'loop')
 
@@ -34,7 +40,19 @@ sys.taskInit(function()
 end)
 ");
 
+
+
             Console.ReadLine();
+        }
+    }
+
+    class Test
+    {
+        public static int test(long s,string text)
+        {
+            Console.WriteLine($"test,{s},{text}");
+            Task.Delay(5000).Wait();
+            return 123;
         }
     }
 }

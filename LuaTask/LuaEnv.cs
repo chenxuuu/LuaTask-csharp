@@ -21,6 +21,7 @@ namespace LuaTask
                 new ConcurrentDictionary<int, CancellationTokenSource>();//timer取消标志池子
         private static ConcurrentBag<LuaTaskData> toRun = new ConcurrentBag<LuaTaskData>();//待运行的池子
         private readonly object taskLock = new object();
+        private int asyncId = 0;//回调函数编号
 
         /// <summary>
         /// 发出报错信息
@@ -159,6 +160,40 @@ namespace LuaTask
                 ErrorEvent?.Invoke(lua, e.Message);
                 return new object[0];
             }
+        }
+
+
+        /// <summary>
+        /// 异步执行C#函数，完成后回调
+        /// </summary>
+        /// <param name="ass">程序集</param>
+        /// <param name="type">类.方法</param>
+        /// <param name="data">传入数据</param>
+        /// <returns>回调的编号</returns>
+        public int AsyncRun(string ass,string type,params object[] data)
+        {
+            int id = asyncId++;
+            if (asyncId > int.MaxValue - 100)
+                asyncId = 0;
+            System.Reflection.Assembly asm = System.Reflection.Assembly.Load(ass);
+            string className = type.Substring(0, type.LastIndexOf("."));
+            Type t = asm.GetType(className);
+            (new Thread(() => 
+            {
+                try
+                {
+                    string method = type.Substring(type.LastIndexOf(".")+1, 
+                        type.Length - type.LastIndexOf(".") - 1);
+                    object r = t.GetMethod(method).Invoke(null, data);
+                    addTask(id, "async", r);
+                }
+                catch(Exception e)
+                {
+                    ErrorEvent?.Invoke(this, e.Message);
+                    addTask(id, "asyncFail", e.Message);
+                }
+            })).Start();
+            return id;
         }
 
         /// <summary>
@@ -502,11 +537,19 @@ end
 
 --触发请求的回调
 local tiggers = {}
+--异步返回的回调
+local asyncTable = {}
 --外部触发
 function sys.tiggerCB(id,t,data)
-    if id >= 0 then--定时器消息
+    if id >= 0 and t == 'timer' then--定时器消息
         sys.tigger(id)
-    elseif type(tiggers[t]) == 'function' then
+    elseif id >= 0 and t == 'async' and type(asyncTable[id]) == 'function' then--异步回调，成功返回
+        asyncTable[id](true,data)
+        asyncTable[id] = nil
+    elseif id >= 0 and t == 'asyncFail' and type(asyncTable[id]) == 'function' then--异步回调，失败
+        asyncTable[id](false,data)
+        asyncTable[id] = nil
+    elseif type(tiggers[t]) == 'function' then---其他外部触发
         tiggers[t](data)
     end
 end
@@ -514,6 +557,19 @@ end
 --注册回调触发函数
 function sys.tiggerRegister(t,f)
     tiggers[t] = f
+end
+
+--异步回调功能
+function sys.async(ass,method,data,cb)
+    local id = 0
+    if type(data) == 'table' then
+        id = _G['@this']:AsyncRun(ass,method,table.unpack(data))
+    else
+        id = _G['@this']:AsyncRun(ass,method,data)
+    end
+    if type(cb) == 'function' then
+        asyncTable[id] = cb
+    end
 end
 ";
     }
