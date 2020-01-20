@@ -6,6 +6,7 @@
     <Authors>chenxuuu</Authors>
     <RepositoryUrl>https://github.com/chenxuuu/LuaTask-csharp</RepositoryUrl>
     <PackageVersion>1.0.3</PackageVersion>
+    <Description>Nlua whit Luat Task (timer and task framework)</Description>
   </PropertyGroup>
 
   <ItemGroup>
