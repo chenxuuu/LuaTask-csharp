@@ -17,27 +17,11 @@ namespace net45Test
             };
 
             l.DoString(@"
-sys.async('net45Test','net45Test.Test.test',{123,'text Test'},
+sys.async('net45Test','net45Test.Test.test',1,
 function(r,data)
 print('cb function',r,data,os.time())
 end)
 print(os.time())
-
-sys.timerStart(print,2000,'2 seconds')
-sys.timerLoopStart(print,1000,'loop')
-
-sys.taskInit(function()
-    while true do 
-        print('task1',os.time())
-        sys.wait(1000)
-    end
-end)
-sys.taskInit(function()
-    while true do 
-        print('task2',os.time())
-        sys.wait(1000)
-    end
-end)
 ");
 
 
@@ -50,9 +34,29 @@ end)
     {
         public static int test(long s,string text)
         {
-            Console.WriteLine($"test,{s},{text}");
+            Console.WriteLine($"long string,{s},{text}");
             Task.Delay(5000).Wait();
             return 123;
+        }
+
+        public static int test(long s, long text)
+        {
+            Console.WriteLine($"long long,{s},{text}");
+            Task.Delay(5000).Wait();
+            return 123;
+        }
+
+        public static int test()
+        {
+            Console.WriteLine($"none");
+            Task.Delay(5000).Wait();
+            return 123;
+        }
+
+        public static void test(long a)
+        {
+            Console.WriteLine($"void");
+            Task.Delay(5000).Wait();
         }
     }
 }

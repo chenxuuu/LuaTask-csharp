@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 
@@ -184,7 +185,10 @@ namespace LuaTask
                 {
                     string method = type.Substring(type.LastIndexOf(".")+1, 
                         type.Length - type.LastIndexOf(".") - 1);
-                    object r = t.GetMethod(method).Invoke(null, data);
+                    List<Type> ft = new List<Type>();
+                    for (int i = 0; i < data.Length; i++)
+                        ft.Add(data[i].GetType());
+                    object r = t.GetMethod(method, ft.ToArray()).Invoke(null, data);
                     addTask(id, "async", r);
                 }
                 catch(Exception e)
@@ -564,6 +568,8 @@ function sys.async(ass,method,data,cb)
     local id = 0
     if type(data) == 'table' then
         id = _G['@this']:AsyncRun(ass,method,table.unpack(data))
+    elseif data == nil then
+        id = _G['@this']:AsyncRun(ass,method)
     else
         id = _G['@this']:AsyncRun(ass,method,data)
     end
