@@ -163,7 +163,6 @@ namespace LuaTask
             }
         }
 
-
         /// <summary>
         /// 异步执行C#函数，完成后回调
         /// </summary>
@@ -176,27 +175,37 @@ namespace LuaTask
             int id = asyncId++;
             if (asyncId > int.MaxValue - 100)
                 asyncId = 0;
-            System.Reflection.Assembly asm = System.Reflection.Assembly.Load(ass);
-            string className = type.Substring(0, type.LastIndexOf("."));
-            Type t = asm.GetType(className);
-            (new Thread(() => 
+            try
             {
-                try
+                System.Reflection.Assembly asm = System.Reflection.Assembly.Load(ass);
+                string className = type.Substring(0, type.LastIndexOf("."));
+                Type t = asm.GetType(className);
+                (new Thread(() =>
                 {
-                    string method = type.Substring(type.LastIndexOf(".")+1, 
-                        type.Length - type.LastIndexOf(".") - 1);
-                    List<Type> ft = new List<Type>();
-                    for (int i = 0; i < data.Length; i++)
-                        ft.Add(data[i].GetType());
-                    object r = t.GetMethod(method, ft.ToArray()).Invoke(null, data);
-                    addTask(id, "async", r);
-                }
-                catch(Exception e)
-                {
-                    ErrorEvent?.Invoke(this, e.Message);
-                    addTask(id, "asyncFail", e.Message);
-                }
-            })).Start();
+                    try
+                    {
+                        string method = type.Substring(type.LastIndexOf(".") + 1,
+                            type.Length - type.LastIndexOf(".") - 1);
+                        List<Type> ft = new List<Type>();
+                        for (int i = 0; i < data.Length; i++)
+                            ft.Add(data[i].GetType());
+                        object r = t.GetMethod(method, ft.ToArray()).Invoke(null, data);
+                        addTask(id, "async", r);
+                    }
+                    catch (Exception e)
+                    {
+                        ErrorEvent?.Invoke(this, e.Message);
+                        addTask(id, "asyncFail", e.Message);
+                    }
+                })).Start();
+            }
+            catch (Exception e)
+            {
+                
+                ErrorEvent?.Invoke(this, e.Message);
+                return -1;
+            }
+
             return id;
         }
 
@@ -573,10 +582,14 @@ function sys.async(ass,method,data,cb)
     else
         id = _G['@this']:AsyncRun(ass,method,data)
     end
-    if type(cb) == 'function' then
+    if type(cb) == 'function' and id >= 0 then
         asyncTable[id] = cb
+    elseif  type(cb) == 'function' and id < 0 then
+        cb(false, 'load C# function fail')
     end
 end
+
+
 ";
     }
 

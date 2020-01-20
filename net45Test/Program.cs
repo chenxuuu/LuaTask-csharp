@@ -17,13 +17,14 @@ namespace net45Test
             };
 
             l.DoString(@"
-sys.async('net45Test','net45Test.Test.test',1,
+import('System')
+t = TimeSpan(10000000)
+sys.async('mscorlib','System.Threading.Thread.Sleep',t,
 function(r,data)
 print('cb function',r,data,os.time())
 end)
 print(os.time())
 ");
-
 
 
             Console.ReadLine();
