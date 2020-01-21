@@ -49,14 +49,13 @@ end)
 
 C# call back function
 
-```lua
-sys.tiggerRegister("test",function(data)
-    print("tigger!",data.s,data.n)
-end)
-```
-
 ```csharp
 var lua = new LuaTask.LuaEnv();
+lua.DoString(@"
+sys.tiggerRegister('test',function(data)
+    print('tigger!',data.s,data.n)
+end)
+");
 lua.addTigger("test", new
 {
     s = "test string",
