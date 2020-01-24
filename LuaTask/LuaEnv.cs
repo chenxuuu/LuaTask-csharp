@@ -141,7 +141,7 @@ namespace LuaTask
             catch (Exception e)
             {
                 ErrorEvent?.Invoke(lua, e.Message);
-                return new object[0];
+                throw new Exception(e.Message);
             }
         }
 
@@ -159,7 +159,7 @@ namespace LuaTask
             catch (Exception e)
             {
                 ErrorEvent?.Invoke(lua, e.Message);
-                return new object[0];
+                throw new Exception(e.Message);
             }
         }
 
