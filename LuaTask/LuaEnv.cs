@@ -51,11 +51,7 @@ namespace LuaTask
             if (!stop)
             {
                 toRun.Add(new LuaTaskData { id = id, type = type, data = data });
-                if (Monitor.TryEnter(taskLock))
-                {
-                    Monitor.Exit(taskLock);
-                    runTask();
-                }
+                runTask();
             }
         }
 
@@ -136,7 +132,7 @@ namespace LuaTask
         {
             try
             {
-                return lua.DoString(s);
+                lock (taskLock) return lua.DoString(s);
             }
             catch (Exception e)
             {
@@ -154,7 +150,7 @@ namespace LuaTask
         {
             try
             {
-                return lua.DoFile(s);
+                lock (taskLock) return lua.DoFile(s);
             }
             catch (Exception e)
             {
@@ -220,7 +216,7 @@ namespace LuaTask
             lua.LoadCLRPackage();
             if (input != null)
                 lua["input"] = input;//传递输入值
-            lua.DoString(sysCode);
+            lock (taskLock) lua.DoString(sysCode);
             lua["@this"] = this;//自己传给自己
         }
 

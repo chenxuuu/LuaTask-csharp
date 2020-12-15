@@ -5,8 +5,11 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Authors>chenxuuu</Authors>
     <RepositoryUrl>https://github.com/chenxuuu/LuaTask-csharp</RepositoryUrl>
-    <PackageVersion>1.0.5</PackageVersion>
-    <Description>Nlua whit Luat Task (timer and task framework)</Description>
+    <PackageVersion>1.0.7</PackageVersion>
+    <Description>Nlua with Luat Task (timer and task framework) https://github.com/chenxuuu/LuaTask-csharp</Description>
+    <Copyright>chenxuuu</Copyright>
+    <Version>1.0.7</Version>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
