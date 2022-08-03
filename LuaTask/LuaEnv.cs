@@ -271,13 +271,21 @@ function sys.wait(ms)
     -- 参数检测，参数不能为负值
     assert(ms > 0, 'The wait time cannot be negative!')
     -- 选一个未使用的定时器ID给该任务线程
-    if taskTimerId >= TASK_TIMER_ID_MAX then taskTimerId = 0 end
-    taskTimerId = taskTimerId + 1
+    while true do
+        if taskTimerId >= TASK_TIMER_ID_MAX - 1 then
+            taskTimerId = 0
+        else
+            taskTimerId = taskTimerId + 1
+        end
+        if taskTimerPool[taskTimerId] == nil then
+            break
+        end
+    end
     local timerid = taskTimerId
     taskTimerPool[coroutine.running()] = timerid
     timerPool[timerid] = coroutine.running()
     -- 调用core的rtos定时器
-    if 1 ~= _G['@this']:StartTimer(timerid, ms) then print('@this.StartTimer error') return end
+    if 1 ~= _G['@this']:StartTimer(timerid, ms) then print('sys.StartTimer error') return end
     -- 挂起调用的任务线程
     local message = {coroutine.yield()}
     if #message ~= 0 then
@@ -496,7 +504,11 @@ local function dispatch()
         end
         local message = table.remove(messageQueue, 1)
         if subscribers[message[1]] then
+            local cbs = {}
             for callback, _ in pairs(subscribers[message[1]]) do
+                table.insert(cbs,callback)
+            end
+            for _,callback in ipairs(cbs) do
                 if type(callback) == 'function' then
                     callback(table.unpack(message, 2, #message))
                 elseif type(callback) == 'thread' then
